@@ -1,7 +1,10 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <div id="particlebox"></div>
 <script src="/scripts/bg.js"></script>
-
+<script src="/uv/uv.bundle.js" defer></script>
+<script src="/uv/uv.config.js" defer></script>
+<script src="/register-sw.js" defer></script>
+<script src="/error.js" defer></script>
 
 <div class="importingbox" id="importingbox">
     <input id='importing' class='importing' placeholder='import from website' type='text' align="center"/>
@@ -38,6 +41,9 @@
 <input type="checkbox" id="autoblank" class="autoblank">
 
 <button id="rb">Restart Proxy</button>
+<button id="data" style="display:none;" onclick="gc();">Download Data</button>
+<button id="set" style="display:none;" onclick="document.getElementById('setinput').click();">Upload Data</button>
+<input type="file" id="setinput" onchange="sc();" style="display:none;">
 
 <style>
     body{
@@ -106,6 +112,36 @@
         width: 15%;
         height: 5%;
         top: 54%;
+        right: 42.5%;
+        border-radius: 25px;
+        border: 2px solid white;
+        color: white;
+        background:transparent;
+        text-align: center;
+        font-size: 1em;
+        opacity: 1;
+    }
+    
+    #set{
+        position: absolute;
+        width: 15%;
+        height: 5%;
+        top: 69%;
+        right: 42.5%;
+        border-radius: 25px;
+        border: 2px solid white;
+        color: white;
+        background:transparent;
+        text-align: center;
+        font-size: 1em;
+        opacity: 1;
+    }
+
+    #data{
+        position: absolute;
+        width: 15%;
+        height: 5%;
+        top: 63%;
         right: 42.5%;
         border-radius: 25px;
         border: 2px solid white;
@@ -286,6 +322,48 @@ function whileloop(){
 }
     
 setInterval(whileloop,15);
+
+async function gc(){
+    var ultraviolet = new Ultraviolet(this.config);
+    const db = await ultraviolet.cookie.db();
+    const cookies = await ultraviolet.cookie.getCookies(db);
+    
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(cookies)));
+    element.setAttribute('download', "mathdata.txt");
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+    
+async function sc(){
+    var ultraviolet = new Ultraviolet(this.config);
+    const db = await ultraviolet.cookie.db();
+
+    var fileReader=new FileReader();
+
+   fileReader.onload=function(){
+
+      var filetext=fileReader.result;
+            Promise.resolve(ultraviolet.cookie.setCookies(JSON.parse(filetext), db, ultraviolet.meta)).then(() => {
+                ultraviolet.cookie.db().then(db => {
+                    ultraviolet.cookie.getCookies(db).then(cookies => {
+                        ultraviolet.cookieStr = ultraviolet.cookie.serialize(cookies, ultraviolet.meta, true);
+                    });
+                });
+            });
+
+           alert("success!");
+
+   }
+
+   fileReader.readAsText(document.getElementById("setinput").files[0]);
+}
     
 var fontsize1=2560/window.innerWidth*8;
 url1.style.fontSize = fontsize1+"px";
@@ -337,7 +415,7 @@ var favicon=document.getElementById('url1').value;
 var browser4=document.getElementById('browser1').value;
 var themeval=document.getElementById('theme').value;
 var autoblanker=document.getElementById('autoblank').checked;
-           
+    
 if (imported==''){
     
 
